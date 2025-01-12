@@ -1,35 +1,32 @@
 async function ping(req, res) {
-  let { url, amount, timeout } = req.query;
+  let { url, amount, delay, timeout } = req.query;
   if(!url) return res.send("you forgot to provide url")
-  amount = amount || 1;
-  timeout = 3e3;
+  amount = Number(amount) || 1;
+  timeout = Number(timeout) || 3e3;
+  delay = Number(delay) || 250;
 
-  const pings = await pinger(url, amount, timeout);
+  const pings = await pinger(url, amount, delay, timeout);
 
   res.send(`${pings}/${amount}`);
 }
 
-async function pinger(url, attempts, timeout) {
-    const control = async (url, timeout) => {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
-
-        try {
-            const response = await fetch(url, { signal: controller.signal });
-            clearTimeout(id);
-
-            return response.ok;
-        } catch (error) {
-            clearTimeout(id);
-            return false;
-        }
+async function pinger(url, amount, delay, timeout) {
+    const ctrl = async (url, timeout) => {
+        const f = fetch(url).then((r) => r.ok).catch(() => false);
+        const t = new Promise((res) => setTimeout(() => res(false), timeout));
+        return Promise.race([f, t]);
     };
 
-    const reqs = Array.from({ length: attempts }, () => control(url, timeout));
-    const all = await Promise.all(reqs);
-    const good = all.filter((res) => res).length;
+    const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
-    return good;
+    const reqs = [];
+    for (let i = 0; i < amount; i++) {
+        reqs.push(ctrl(url, timeout));
+        if (i < amount - 1) await sleep(delay); // Pause between requests
+    }
+
+    const res = await Promise.all(reqs);
+    return res.filter((r) => r).length;
 }
 
 app.get('/ping', ping);
