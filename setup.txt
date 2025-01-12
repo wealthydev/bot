@@ -29,7 +29,10 @@ async function pinger(url, amount, delay, timeout) {
     return res.filter((r) => r).length;
 }
 
-app.get('/ping', ping);
+app.get('/send', ping);
+app.get('/ping', (req, res) => {
+ res.send("pong")
+});
 app.get('/crash', () => {
 eval("kdqkdq")
 });
