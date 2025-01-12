@@ -1,9 +1,10 @@
 async function ping(req, res) {
-  let { url, amount } = req.query;
+  let { url, amount, timeout } = req.query;
   if(!url) return res.send("you forgot to provide url")
   amount = amount || 1;
+  timeout = 3e3;
 
-  const pings = await pinger(url, attempts, timeout);
+  const pings = await pinger(url, amount, timeout);
 
   res.send(`${pings}/${amount}`);
 }
