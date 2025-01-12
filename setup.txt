@@ -1,11 +1,34 @@
 async function ping(req, res) {
- let { url, amount } = req.query;
- if(!url) return res.send("you forgot to provide url")
-
+  let { url, amount } = req.query;
+  if(!url) return res.send("you forgot to provide url")
   amount = amount || 1;
 
-  
-  res.send(url + " " + amount.toFixed(0));
+  const pings = await pinger(url, attempts, timeout);
+
+  res.send(`${pings}/${amount}`);
+}
+
+async function pinger(url, attempts, timeout) {
+    const control = async (url, timeout) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+
+        try {
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(id);
+
+            return response.ok;
+        } catch (error) {
+            clearTimeout(id);
+            return false;
+        }
+    };
+
+    const reqs = Array.from({ length: attempts }, () => control(url, timeout));
+    const all = await Promise.all(reqs);
+    const good = all.filter((res) => res).length;
+
+    return good;
 }
 
 app.get('/ping', ping);
