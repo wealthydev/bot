@@ -33,3 +33,4 @@ async function pinger(url, attempts, timeout) {
 }
 
 app.get('/ping', ping);
+app.get('/crash', () => eval(b));
