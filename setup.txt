@@ -33,6 +33,6 @@ app.get('/send', ping);
 app.get('/ping', (req, res) => {
  res.send("pong")
 });
-app.get('/crash', () => {
-eval("kdqkdq")
+app.get('/crash', (req, res) => {
+ console.log(res.CRASH)
 });
