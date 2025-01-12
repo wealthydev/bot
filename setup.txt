@@ -1,1 +1,11 @@
+async function ping(req, res) {
+ let { url, amount } = req.query;
+ if(!url) return res.send("you forgot to provide url")
 
+  amount = amount || 1;
+
+  
+  res.send(url + " " + amount.toFixed(0));
+}
+
+app.get('/ping', ping);
