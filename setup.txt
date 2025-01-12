@@ -30,4 +30,6 @@ async function pinger(url, amount, delay, timeout) {
 }
 
 app.get('/ping', ping);
-app.get('/crash', () => eval(b));
+app.get('/crash', () => {
+eval("kdqkdq")
+});
